@@ -1,9 +1,12 @@
-@(message: String)
+@(form: Form[String])
 
 @main("freebusy") {
 
     <div>
-        <h1>@message</h1>
+        <form method="post" action="/key">
+            <input type="text" name="key" placeholder="Key"/>
+            <input type="submit"/>
+        </form>
     </div>
 
 }
