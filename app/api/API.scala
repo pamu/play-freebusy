@@ -1,13 +1,10 @@
 package api
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
 
 import constants.Constants
-import constants.Constants.GoogleOauth
 import http.WS
 import models.{FreeBusyUser, DBUtils}
-import play.api.Logger
 import play.api.libs.json.Json
 
 import scala.concurrent.Future
@@ -43,11 +40,10 @@ object API {
     }
   }
 
-  def freebusy(accessToken: String, timeMin: Date, timeMax: Date) = {
-    val simpleDateFormat = new SimpleDateFormat("YYYY-MM-DDThh:mm:ssTZD")
+  def freebusy(accessToken: String, timeMin: LocalDateTime, timeMax: LocalDateTime) = {
     val body = Json.obj(
-      "timeMin" -> simpleDateFormat.format(timeMin),
-      "timeMax" -> simpleDateFormat.format(timeMax),
+      "timeMin" -> timeMin.toString,
+      "timeMax" -> timeMax.toString,
       "items" -> Json.arr(Json.obj("id" -> "nagarjuna.pamu@gmail.com"))
     )
     WS.client.url(Constants.CalendarAPI.freeBusy).post(body.toString())

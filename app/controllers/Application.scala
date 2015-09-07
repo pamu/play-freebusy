@@ -1,5 +1,6 @@
 package controllers
 
+import java.time.LocalDateTime
 import java.util.Date
 
 import api.API
@@ -103,9 +104,8 @@ object Application extends Controller {
       }}}
 
   def freebusy(accessToken: String) = Action.async { implicit request =>
-    val start = new Date()
-    val end = new Date()
-    end.setMonth(12)
+    val start = LocalDateTime.now()
+    val end = LocalDateTime.of(2016, 1, 1, 1, 1)
     API.freebusy(accessToken, start, end).map {response => {
       Ok(s"${Json.prettyPrint(Json.parse(response.body))}")
     }}
