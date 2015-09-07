@@ -44,7 +44,7 @@ object API {
   }
 
   def freebusy(accessToken: String, timeMin: Date, timeMax: Date) = {
-    val simpleDateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss")
+    val simpleDateFormat = new SimpleDateFormat("YYYY-MM-DDThh:mm:ssTZD")
     val body = Json.obj(
       "timeMin" -> simpleDateFormat.format(timeMin),
       "timeMax" -> simpleDateFormat.format(timeMax),
