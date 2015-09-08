@@ -9,6 +9,7 @@ object Constants {
     val client_secret = "_ohIYxY4azxWSE5ntFf1cQts"
     val GoogleOauth2 = "https://accounts.google.com/o/oauth2/auth"
     val TokenEndpoint = "https://www.googleapis.com/oauth2/v3/token"
+    val redirectURI = "http://busyboy.herokuapp.com/oauth2callback"
   }
   object CalendarAPI {
     def events(calendarId: String) =  s"https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events"

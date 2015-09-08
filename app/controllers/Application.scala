@@ -43,7 +43,7 @@ object Application extends Controller {
       ("state" -> userId.toString),
       ("response_type" -> "code"),
       ("client_id" -> s"${Constants.GoogleOauth.client_id}"),
-      ("redirect_uri" -> "http://freebusy.herokuapp.com/oauth2callback"),
+      ("redirect_uri" -> s"${Constants.GoogleOauth.redirectURI}"),
       ("access_type" -> "offline"),
       ("approval_prompt" -> "force")
     ).convert.mkString("?", "&", "").toString
@@ -68,7 +68,7 @@ object Application extends Controller {
       ("code" -> s"$code"),
       ("client_id" -> s"${Constants.GoogleOauth.client_id}"),
       ("client_secret" -> s"${Constants.GoogleOauth.client_secret}"),
-      ("redirect_uri" -> "http://freebusy.herokuapp.com/oauth2callback"),
+      ("redirect_uri" -> s"${Constants.GoogleOauth.redirectURI}"),
       ("grant_type" -> "authorization_code")
     )
     WS.client.url(Constants.GoogleOauth.TokenEndpoint)
@@ -118,7 +118,6 @@ object Application extends Controller {
     request.body.validate[EventQuery] match {
       case success: JsSuccess[EventQuery] => {
         val eventQuery = success.value
-        
         val dbAction = DBUtils.getUser(eventQuery.key)
         val response = dbAction.flatMap { freeBusyUser => {
           val events = API.events(freeBusyUser.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
