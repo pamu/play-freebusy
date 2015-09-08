@@ -29,6 +29,6 @@ object DBUtils {
       val user = users.head
       val current = System.currentTimeMillis()
       val estimatedLastTime = (current - ((user.refreshPeriod - 60) * 1000))
-      DBIO.successful(user.lastRefreshTime.getTime < estimatedLastTime)
+      DBIO.successful(user.lastRefreshTime.getTime >= estimatedLastTime)
     }}).transactionally)
 }
