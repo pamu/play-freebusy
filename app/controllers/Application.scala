@@ -1,9 +1,12 @@
 package controllers
 
+import java.sql.Timestamp
+import java.util.Date
+
 import api.API
 import constants.Constants
 import http.WS
-import models.{DBUtils, FreeBusyUser}
+import models.{User, DBUtils}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json._
@@ -72,10 +75,10 @@ object Application extends Controller {
       .withHeaders("Content-Type" -> "application/x-www-form-urlencoded; charset=utf-8")
       .post(body.convert.mkString("", "&", "")).flatMap { response => {
         val jsonBody = Json.parse(response.body)
-        val freeBusyUser = FreeBusyUser(state, (jsonBody \ "access_token").as[String],
-          (jsonBody \ "refresh_token").as[String], (jsonBody \ "expires_in").as[Long])
-        val dbAction = DBUtils.saveNew(freeBusyUser)
-        val result = dbAction.flatMap { result  => Future(Ok(s"Done ${freeBusyUser.toString}")) }
+        val user = User(state, (jsonBody \ "access_token").as[String],
+          (jsonBody \ "refresh_token").as[String], (jsonBody \ "expires_in").as[Long], new Timestamp(new Date().getTime))
+        val dbAction = DBUtils.saveNew(user)
+        val result = dbAction.flatMap { result  => Future(Ok(s"Done ${user.toString}")) }
         dbAction.recover {case th => Ok(s"Failed, reason: ${th.getMessage}")}
         result
       }}
@@ -94,12 +97,12 @@ object Application extends Controller {
       .post(body.convert.mkString("", "&", "")).flatMap {
       response => {
         val jsonBody = Json.parse(response.body)
-        val freeBusyUser = FreeBusyUser(state, (jsonBody \ "access_token").as[String],
-          refreshToken, (jsonBody \ "expires_in").as[Long])
-        val dbAction = DBUtils.saveNew(freeBusyUser)
+        val user = User(state, (jsonBody \ "access_token").as[String],
+          refreshToken, (jsonBody \ "expires_in").as[Long], new Timestamp(new Date().getTime))
+        val dbAction = DBUtils.saveNew(user)
         dbAction.recover {case th => Ok(s"Database operation failed, reason ${th.getMessage}") }
         dbAction.flatMap { _ => {
-          Future(Ok(s"refresh done ${freeBusyUser.toString}"))
+          Future(Ok(s"refresh done ${user.toString}"))
         }}
       }}}
 
@@ -127,6 +130,12 @@ object Application extends Controller {
         response
       }
       case error: JsError => Future(BadRequest(Json.obj("errors" -> error.errors.mkString(","))))
+    }
+  }
+
+  def check(key: String) = Action.async {
+    DBUtils.checkRefreshRequired(key).map { status =>
+      Ok(status)
     }
   }
 

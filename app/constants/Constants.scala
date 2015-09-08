@@ -5,8 +5,8 @@ package constants
  */
 object Constants {
   object GoogleOauth {
-    val client_id = "1022260014178-3j2a1eh106anem74t2hon3ve5bcntrs6.apps.googleusercontent.com"
-    val client_secret = "e8ATC6oCAVUQZx8aby9oroSl"
+    val client_id = "954456399684-5tvd9glj085o0ehg8fp907ja85dm3hv5.apps.googleusercontent.com"
+    val client_secret = "_ohIYxY4azxWSE5ntFf1cQts"
     val GoogleOauth2 = "https://accounts.google.com/o/oauth2/auth"
     val TokenEndpoint = "https://www.googleapis.com/oauth2/v3/token"
   }

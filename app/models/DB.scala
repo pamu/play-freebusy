@@ -9,7 +9,7 @@ import scala.concurrent.Future
  * Created by pnagarjuna on 06/09/15.
  */
 object DB {
-  lazy val uri = new URI(s"""postgres://juldrwenibiidu:Aggx36AXCmEe6S5u1QD7gC0NWN@ec2-23-21-76-246.compute-1.amazonaws.com:5432/d97u5v3qubtr9v""")
+  lazy val uri = new URI(s"""postgres://dmgoujfbmunolj:0ugoOmt_jcMoRpzcdwFnQE7Ptr@ec2-54-235-162-144.compute-1.amazonaws.com:5432/dc2bfacovjbkvl""")
   lazy val username = uri.getUserInfo.split(":")(0)
 
   lazy val password = uri.getUserInfo.split(":")(1)
@@ -20,9 +20,9 @@ object DB {
     password = password
   )
 
-  lazy val freeBusyUsers = TableQuery[FreeBusyUsers]
+  lazy val users = TableQuery[Users]
 
-  def init: Future[Unit] = DB.db.run(DBIO.seq(freeBusyUsers.schema.create))
+  def init: Future[Unit] = DB.db.run(DBIO.seq(users.schema.create))
 
-  def clean: Future[Unit] = DB.db.run(DBIO.seq(freeBusyUsers.schema.drop))
+  def clean: Future[Unit] = DB.db.run(DBIO.seq(users.schema.drop))
 }

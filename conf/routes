@@ -9,6 +9,7 @@ GET     /oncode                     controllers.Application.onCode(state: String
 #GET     /refreshtoken               controllers.Application.refreshToken(state: String, refreshToken: String)
 POST    /key                        controllers.Application.key()
 POST    /events                     controllers.Application.events()
+GET     /check                      controllers.Application.check(key: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

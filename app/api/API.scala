@@ -1,11 +1,11 @@
 package api
 
-import java.time.LocalDateTime
+import java.sql.Timestamp
 import java.util.Date
 
 import constants.Constants
 import http.WS
-import models.{FreeBusyUser, DBUtils}
+import models.{User, DBUtils}
 import play.api.libs.json.Json
 
 import scala.concurrent.Future
@@ -33,8 +33,8 @@ object API {
       .post(body.convert.mkString("", "&", "")).flatMap {
       response => {
         val jsonBody = Json.parse(response.body)
-        val freeBusyUser = FreeBusyUser(key, (jsonBody \ "access_token").as[String],
-          refreshToken, (jsonBody \ "expires_in").as[Long])
+        val freeBusyUser = User(key, (jsonBody \ "access_token").as[String],
+          refreshToken, (jsonBody \ "expires_in").as[Long], new Timestamp(new Date().getTime))
         val dbAction = DBUtils.saveNew(freeBusyUser)
         dbAction
       }

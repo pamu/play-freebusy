@@ -1,5 +1,8 @@
 package models
 
+import java.sql.Timestamp
+import java.util.Date
+
 import scala.concurrent.Future
 import slick.driver.PostgresDriver.api._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -8,15 +11,23 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
  * Created by pnagarjuna on 06/09/15.
  */
 object DBUtils {
-  def saveNew(freeBusyUser: FreeBusyUser): Future[Int] = DB.db.run((
-    DB.freeBusyUsers.filter(_.key === freeBusyUser.key).exists.result.flatMap { exists => {
+  def saveNew(user: User): Future[Int] = DB.db.run((
+    DB.users.filter(_.key === user.key).exists.result.flatMap { exists => {
       if (! exists) {
-        DB.freeBusyUsers += freeBusyUser
+        DB.users += user
       } else {
-        DB.freeBusyUsers.filter(_.key === freeBusyUser.key).result.flatMap { fbu =>
-          DB.freeBusyUsers.filter(_.key === freeBusyUser.key).update(freeBusyUser.copy(id = fbu.head.id))
+        DB.users.filter(_.key === user.key).result.flatMap { fbu =>
+          DB.users.filter(_.key === user.key).update(user.copy(id = fbu.head.id))
         }
       }
     }}).transactionally)
-  def getFBU(key: String): Future[FreeBusyUser] = DB.db.run(DB.freeBusyUsers.filter(_.key === key).result.head)
+
+  def getFBU(key: String): Future[User] = DB.db.run(DB.users.filter(_.key === key).result.head)
+
+  def checkRefreshRequired(key: String): Future[Boolean] = DB.db.run((
+    DB.users.filter(_.key === key).result.flatMap { users => {
+      val user = users.head
+      val current = System.currentTimeMillis()
+      DB.users.filter(_.key === key).filter(_.lastRefreshTime < (current - ((user.refreshPeriod - 60) * 1000))).exists.result
+    }}).transactionally)
 }
