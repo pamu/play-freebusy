@@ -1,7 +1,7 @@
 package controllers
 
 import java.time.LocalDateTime
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import api.API
 import constants.Constants
@@ -103,11 +103,11 @@ object Application extends Controller {
         }}
       }}}
 
-  def freebusy(accessToken: String) = Action.async { implicit request =>
-    val start = LocalDateTime.now()
-    val end = LocalDateTime.of(2016, 1, 1, 1, 1)
-    API.freebusy(accessToken, start, end).map {response => {
-      Ok(s"${Json.prettyPrint(Json.parse(response.body))}")
+  def events(accessToken: String) = Action.async { implicit request =>
+    val start = Calendar.getInstance().getTime
+    val end = Calendar.getInstance().getTime
+    API.events(accessToken, start, end).map { response => {
+      Ok(Json.parse(response.body))
     }}
   }
 }

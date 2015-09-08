@@ -1,6 +1,7 @@
 package api
 
 import java.time.LocalDateTime
+import java.util.Date
 
 import constants.Constants
 import http.WS
@@ -40,12 +41,13 @@ object API {
     }
   }
 
-  def freebusy(accessToken: String, timeMin: LocalDateTime, timeMax: LocalDateTime) = {
+  def events(accessToken: String, timeMin: Date, timeMax: Date) = {
     val body = Json.obj(
       "timeMin" -> timeMin.toString,
-      "timeMax" -> timeMax.toString,
-      "items" -> Json.arr(Json.obj("id" -> "nagarjuna.pamu@gmail.com"))
+      "timeMax" -> timeMax.toString
     )
-    WS.client.url(Constants.CalendarAPI.freeBusy).post(body.toString())
+    WS.client.url(Constants.CalendarAPI.events("primary")).withQueryString(
+      "access_token" -> accessToken
+    ).post(body.toString())
   }
 }
