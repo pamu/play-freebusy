@@ -119,14 +119,33 @@ object Application extends Controller {
       case success: JsSuccess[EventQuery] => {
         val eventQuery = success.value
         val dbAction = DBUtils.getUser(eventQuery.key)
-        val response = dbAction.flatMap { freeBusyUser => {
-          val events = API.events(freeBusyUser.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
-            Ok(Json.parse(response.body))
+        val response = dbAction.flatMap { user => {
+          DBUtils.checkRefreshRequired(user.key).flatMap { status => {
+            if (status) {
+              val events = API.events(user.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
+                Ok(Json.parse(response.body))
+              }}
+              events.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
+              events
+            } else {
+              val refresh = API.refresh(user.refreshToken, user.key).flatMap { status =>
+                val dbActionAfterRefresh = DBUtils.getUser(eventQuery.key).flatMap { user => {
+                  val events = API.events(user.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
+                    Ok(Json.parse(response.body))
+                  }}
+                  events.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
+                  events
+                }}
+                dbActionAfterRefresh.recover { case th => BadRequest(Json.obj("errors" -> "DB action after refresh failed"))}
+                dbActionAfterRefresh
+              }
+              refresh.recover {case th => BadRequest(Json.obj("errors" -> "Refresh action failed"))}
+              refresh
+            }
           }}
-          events.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
-          events
+
         }}
-        dbAction.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
+        dbAction.recover { case th => BadRequest(Json.obj("errors" -> s"No user with the key: ${eventQuery.key}")) }
         response
       }
       case error: JsError => Future(BadRequest(Json.obj("errors" -> error.errors.mkString(","))))
