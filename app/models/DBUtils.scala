@@ -22,12 +22,13 @@ object DBUtils {
       }
     }}).transactionally)
 
-  def getFBU(key: String): Future[User] = DB.db.run(DB.users.filter(_.key === key).result.head)
+  def getUser(key: String): Future[User] = DB.db.run(DB.users.filter(_.key === key).result.head)
 
   def checkRefreshRequired(key: String): Future[Boolean] = DB.db.run((
     DB.users.filter(_.key === key).result.flatMap { users => {
       val user = users.head
       val current = System.currentTimeMillis()
-      DB.users.filter(_.key === key).filter(_.lastRefreshTime < (current - ((user.refreshPeriod - 60) * 1000))).exists.result
+      val estimatedLastTime = (current - ((user.refreshPeriod - 60) * 1000))
+      DBIO.successful(user.lastRefreshTime.getTime < estimatedLastTime)
     }}).transactionally)
 }

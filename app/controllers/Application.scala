@@ -118,7 +118,8 @@ object Application extends Controller {
     request.body.validate[EventQuery] match {
       case success: JsSuccess[EventQuery] => {
         val eventQuery = success.value
-        val dbAction = DBUtils.getFBU(eventQuery.key)
+        
+        val dbAction = DBUtils.getUser(eventQuery.key)
         val response = dbAction.flatMap { freeBusyUser => {
           val events = API.events(freeBusyUser.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
             Ok(Json.parse(response.body))
@@ -135,7 +136,7 @@ object Application extends Controller {
 
   def check(key: String) = Action.async {
     DBUtils.checkRefreshRequired(key).map { status =>
-      Ok(status)
+      Ok(status.toString)
     }
   }
 
