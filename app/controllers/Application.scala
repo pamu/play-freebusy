@@ -1,19 +1,19 @@
 package controllers
 
-import java.time.LocalDateTime
-import java.util.{Calendar, Date}
-
 import api.API
 import constants.Constants
 import http.WS
 import models.{DBUtils, FreeBusyUser}
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 object Application extends Controller {
 
@@ -103,11 +103,31 @@ object Application extends Controller {
         }}
       }}}
 
-  def events(accessToken: String) = Action.async { implicit request =>
-    val start = Calendar.getInstance().getTime
-    val end = Calendar.getInstance().getTime
-    API.events(accessToken, start, end).map { response => {
-      Ok(Json.parse(response.body))
-    }}
+
+  case class EventQuery(key: String, timeMin: String, timeMax: String)
+
+  implicit val eqReads: Reads[EventQuery] = (
+    (JsPath \ "key").read[String] and
+    (JsPath \ "timeMin").read[String] and (JsPath \ "timeMax").read[String]
+  )(EventQuery.apply _)
+
+  def events() = Action.async(parse.json) { implicit request =>
+    request.body.validate[EventQuery] match {
+      case success: JsSuccess[EventQuery] => {
+        val eventQuery = success.value
+        val dbAction = DBUtils.getFBU(eventQuery.key)
+        val response = dbAction.flatMap { freeBusyUser => {
+          val events = API.events(freeBusyUser.accessToken, eventQuery.timeMin, eventQuery.timeMax).map { response => {
+            Ok(Json.parse(response.body))
+          }}
+          events.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
+          events
+        }}
+        dbAction.recover { case th => BadRequest(Json.obj("errors" -> th.getMessage)) }
+        response
+      }
+      case error: JsError => Future(BadRequest(Json.obj("errors" -> error.errors.mkString(","))))
+    }
   }
+
 }

@@ -41,10 +41,10 @@ object API {
     }
   }
 
-  def events(accessToken: String, timeMin: Date, timeMax: Date) = {
+  def events(accessToken: String, timeMin: String, timeMax: String) = {
     val body = Json.obj(
-      "timeMin" -> timeMin.toString,
-      "timeMax" -> timeMax.toString
+      "timeMin" -> timeMin,
+      "timeMax" -> timeMax
     )
     WS.client.url(Constants.CalendarAPI.events("primary")).withQueryString(
       "access_token" -> accessToken
