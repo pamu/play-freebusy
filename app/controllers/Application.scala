@@ -143,7 +143,6 @@ object Application extends Controller {
               refresh
             }
           }}
-
         }}
         dbAction.recover { case th => BadRequest(Json.obj("errors" -> s"No user with the key: ${eventQuery.key}")) }
         response

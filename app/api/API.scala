@@ -42,12 +42,10 @@ object API {
   }
 
   def events(accessToken: String, timeMin: String, timeMax: String) = {
-    val body = Json.obj(
+    WS.client.url(Constants.CalendarAPI.events("primary")).withQueryString(
+      "access_token" -> accessToken,
       "timeMin" -> timeMin,
       "timeMax" -> timeMax
-    )
-    WS.client.url(Constants.CalendarAPI.events("primary")).withQueryString(
-      "access_token" -> accessToken
-    ).post(body.toString())
+    ).get()
   }
 }
