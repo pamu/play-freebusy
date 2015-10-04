@@ -14,4 +14,7 @@ object Constants {
   object CalendarAPI {
     def events(calendarId: String) =  s"https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events"
   }
+  object Jeff {
+    def calendarId = "gffviv4usbf87uda726kl9qfq0@group.calendar.google.com"
+  }
 }
